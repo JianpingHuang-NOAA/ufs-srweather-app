@@ -1433,7 +1433,7 @@ task_run_fcst:
   #-----------------------------------------------------------------------
   #
   KMP_AFFINITY_RUN_FCST: "scatter"
-  OMP_NUM_THREADS_RUN_FCST: 2    # atmos_nthreads in model_configure
+  OMP_NUM_THREADS_RUN_FCST: 1    # atmos_nthreads in model_configure
   OMP_STACKSIZE_RUN_FCST: "1024m"
   #
   #-----------------------------------------------------------------------
@@ -2306,7 +2306,7 @@ cpl_aqm_parm:
   RUN_NEXUS_TN: "run_nexus"
   NNODES_RUN_NEXUS: 4
   PPN_RUN_NEXUS: "" # will be calculated from NCORES_PER_NODE and OMP_NUM_THREADS in setup.py
-  WTIME_RUN_NEXUS: 00:30:00
+  WTIME_RUN_NEXUS: 01:30:00
   MAXTRIES_RUN_NEXUS: 2
   KMP_AFFINITY_RUN_NEXUS: "scatter"
   OMP_NUM_THREADS_RUN_NEXUS: 2
