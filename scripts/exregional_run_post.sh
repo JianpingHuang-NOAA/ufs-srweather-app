@@ -278,14 +278,14 @@ cd_vrfy "${COMOUT}"
 basetime=$( $DATE_UTIL --date "$yyyymmdd $hh" +%y%j%H%M )
 symlink_suffix="${dot_ensmem}.${basetime}f${fhr}${post_mn}"
 if [ "${CPL_AQM}" = "TRUE" ]; then
-  fids=( "all" )
+  fids=( "cmaq" )
 else
   fids=( "prslev" "natlev" )
 fi
 for fid in "${fids[@]}"; do
   FID=$(echo_uppercase $fid)
   post_orig_fn="${FID}.${post_fn_suffix}"
-  post_renamed_fn="${NET}.${cycle}${dot_ensmem}.${fid}.${post_renamed_fn_suffix}"
+  post_renamed_fn="${NET}.${cycle}${dot_ensmem}.all.${post_renamed_fn_suffix}"
   mv_vrfy ${DATA_FHR}/${post_orig_fn} ${post_renamed_fn}
   if [ $RUN_ENVIR != "nco" ]; then
     create_symlink_to_file target="${post_renamed_fn}" \
