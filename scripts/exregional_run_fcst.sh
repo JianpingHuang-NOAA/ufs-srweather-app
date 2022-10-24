@@ -537,8 +537,8 @@ if [ "${RUN_ENVIR}" = "nco" ]; then
 
   # create the symlinks
   for fhr in $(seq -f "%03g" 0 ${FCST_LEN_HRS}); do
-    ln_vrfy -sf "${DATA_SHARED}/${NET}.${cycle}${dot_ensmem}.dyn.f${fhr}${mnts_secs_str}.nc" "dynf${fhr}${mnts_secs_str}.nc"
-    ln_vrfy -sf "${DATA_SHARED}/${NET}.${cycle}${dot_ensmem}.phy.f${fhr}${mnts_secs_str}.nc" "phyf${fhr}${mnts_secs_str}.nc"
+    ln_vrfy -sf "${COMOUT}/${NET}.${cycle}${dot_ensmem}.dyn.f${fhr}${mnts_secs_str}.nc" "dynf${fhr}${mnts_secs_str}.nc"
+    ln_vrfy -sf "${COMOUT}/${NET}.${cycle}${dot_ensmem}.phy.f${fhr}${mnts_secs_str}.nc" "phyf${fhr}${mnts_secs_str}.nc"
   done
 fi
 #
