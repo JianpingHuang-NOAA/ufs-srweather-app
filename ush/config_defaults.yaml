@@ -1224,7 +1224,7 @@ task_get_extrn_lbcs:
   GET_EXTRN_LBCS_TN: "get_extrn_lbcs"
   NNODES_GET_EXTRN_LBCS: 1
   PPN_GET_EXTRN_LBCS: 1
-  WTIME_GET_EXTRN_LBCS: 00:45:00
+  WTIME_GET_EXTRN_LBCS: 02:45:00
   MAXTRIES_GET_EXTRN_LBCS: 1
   #
   #-----------------------------------------------------------------------
@@ -1410,7 +1410,7 @@ task_run_fcst:
   #-----------------------------------------------------------------------
   #
   KMP_AFFINITY_RUN_FCST: "scatter"
-  OMP_NUM_THREADS_RUN_FCST: 2    # atmos_nthreads in model_configure
+  OMP_NUM_THREADS_RUN_FCST: 1    # atmos_nthreads in model_configure
   OMP_STACKSIZE_RUN_FCST: "1024m"
   #
   #-----------------------------------------------------------------------
@@ -2132,7 +2132,7 @@ cpl_aqm_parm:
   NEXUS_EMISSION_TN: "nexus_emission"
   NNODES_NEXUS_EMISSION: 4
   PPN_NEXUS_EMISSION: "" # will be calculated from NCORES_PER_NODE and OMP_NUM_THREADS in setup.py
-  WTIME_NEXUS_EMISSION: 00:30:00
+  WTIME_NEXUS_EMISSION: 01:30:00
   MAXTRIES_NEXUS_EMISSION: 2
   KMP_AFFINITY_NEXUS_EMISSION: "scatter"
   OMP_NUM_THREADS_NEXUS_EMISSION: 2

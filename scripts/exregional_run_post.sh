@@ -263,7 +263,11 @@ if [ "${post_mn}" != "00" ]; then
 fi
 
 post_fn_suffix="GrbF${post_fhr}${dot_post_mn_or_null}"
-post_renamed_fn_suffix="f${fhr}${post_mn_or_null}.${POST_OUTPUT_DOMAIN_NAME}.grib2"
+if [ "${POST_OUTPUT_DOMAIN_NAME}" = "aqm_na_13km" ] ; then
+ post_renamed_fn_suffix="f${fhr}${post_mn_or_null}.793.grib2"
+else
+ post_renamed_fn_suffix="f${fhr}${post_mn_or_null}.${POST_OUTPUT_DOMAIN_NAME}.grib2"
+fi
 #
 # For convenience, change location to COMOUT (where the final output
 # from UPP will be located).  Then loop through the two files that UPP
@@ -274,7 +278,8 @@ cd_vrfy "${COMOUT}"
 basetime=$( $DATE_UTIL --date "$yyyymmdd $hh" +%y%j%H%M )
 symlink_suffix="${dot_ensmem}.${basetime}f${fhr}${post_mn}"
 if [ "${CPL_AQM}" = "TRUE" ]; then
-  fids=( "cmaq" )
+  #fids=( "cmaq" )
+  fids=( "all" )
 else
   fids=( "prslev" "natlev" )
 fi
