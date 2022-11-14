@@ -98,6 +98,9 @@ hh=${yyyymmddhh:8:2}
 #
 #-----------------------------------------------------------------------
 #
+if [[ $cyc = 00 ]] && [[ $RUN_ENVIR = "nco" ]]; then
+ input_file_path='compath.py ${envir}/gfs/${gfs_ver}/gfs.${PDYm1}/${hh}/atmos'
+fi
 input_file_path=$(eval echo ${input_file_path})
 if [[ $input_file_path = *" "* ]]; then
   input_file_path=$(eval ${input_file_path})

@@ -577,8 +577,10 @@ if [ "${RUN_ENVIR}" = "nco" ]; then
   fi
 
   if [ "${CPL_AQM}" = "TRUE" ]; then
-    cp_vrfy ${DATA}/dynf*.nc ${COMOUT}
-    cp_vrfy ${DATA}/phyf*.nc ${COMOUT}
+   for fhr in $(seq -f "%03g" 0 ${FCST_LEN_HRS}); do
+     mv_vrfy ${DATA}/dynf${fhr}.nc ${COMOUT}/${NET}.${cycle}${dot_ensmem}.dyn.f${fhr}.nc
+     mv_vrfy ${DATA}/phyf${fhr}.nc ${COMOUT}/${NET}.${cycle}${dot_ensmem}.phy.f${fhr}.nc
+   done
   fi
 fi
 #
