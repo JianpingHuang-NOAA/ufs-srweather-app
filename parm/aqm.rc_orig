@@ -25,13 +25,14 @@ dy_tracer_map_start: 9
 
 ctm_aod: true
 ctm_pmdiag: true
-ctm_stdout: none 
 
 #
 #  Input emissions
 #
 emission_sources: anthro fire
+{%- if do_aqm_canopy %} canopy{% endif %}
 {%- if do_aqm_fengsha %} fengsha{% endif %}
+{%- if do_aqm_product %} prod{% endif %}
 
 #
 #  Anthropogenic
@@ -145,11 +146,11 @@ anthro_species::
 #
 # FENGSHA
 #
+fengsha_yn: {{ do_aqm_fengsha | lower }}
 fengsha_type: fengsha
 fengsha_format: netcdf
 fengsha_file: {{ aqm_rc_fengsha_file_fp }}
 fengsha_frequency: monthly
-fengsha_alpha: 0.05
 fengsha_species::
     CLAYF       1.00000   clayfrac     1
     SANDF       1.00000   sandfrac     1
