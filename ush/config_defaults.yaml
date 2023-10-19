@@ -962,8 +962,10 @@ nco:
   #
   DBNROOT_dfv: ""
   SENDECF_dfv: false
-  SENDDBN_dfv: false
-  SENDDBN_NTC_dfv: false
+    #jp SENDDBN_dfv: false
+  SENDDBN_dfv: true 
+    #SENDDBN_NTC_dfv: false
+  SENDDBN_NTC_dfv: true 
   SENDCOM_dfv: false
   SENDWEB_dfv: false
   KEEPDATA_dfv: true
