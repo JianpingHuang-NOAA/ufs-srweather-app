@@ -34,10 +34,14 @@ data:
     NAM: compath.py ${envir}/nam/${nam_ver}/nam.${PDYext}
     HRRR: compath.py ${envir}/hrrr/${hrrr_ver}/hrrr.${PDYext}/conus
 cpl_aqm_parm:
-  COMINgefs: /lfs/h1/ops/prod/com/gefs/v12.3
-  DCOMINairnow: /lfs/h1/ops/prod/dcom
+  #COMINgefs: /lfs/h1/ops/prod/com/gefs/v12.3
+  COMINgefs: /lfs/h2/emc/ptmp/jianping.huang/gefs/v12.3
+  AQM_GEFS_FILE_CYC: 00
+  #DCOMINairnow: /lfs/h1/ops/prod/dcom
+  DCOMINairnow: /lfs/h2/emc/physics/noscrub/jianping.huang/dcom 
   COMINemis: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/emissions
   COMINemispt: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/emissions/nei2016v1-pt
-  DCOMINfire: /lfs/h1/ops/prod/dcom 
-  COMINbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/bias_correction/aqmv7.0.88f
-  COMOUTbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/bias_correction/aqmv7.0.88f
+  #DCOMINfire: /lfs/h1/ops/prod/dcom 
+  DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_NA_NRT/RAVE_raw_scaleup 
+  COMINbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/bias_correction/aqmv7.0.91a
+  COMOUTbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/bias_correction/aqmv7.0.91a

@@ -1,19 +1,13 @@
 #!/bin/bash
 
-set -xe
-
-msg="JOB $job HAS BEGUN"
-postmsg "$msg"
-   
-export pgm=aqm_nexus_emissions
-
+#
 #-----------------------------------------------------------------------
 #
 # Source the variable definitions file and the bash utility functions.
 #
 #-----------------------------------------------------------------------
 #
-. $USHaqm/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 source_config_for_task "cpl_aqm_parm|task_nexus_emission|task_nexus_gfs_sfc" ${GLOBAL_VAR_DEFNS_FP}
 #
 #-----------------------------------------------------------------------
@@ -23,7 +17,7 @@ source_config_for_task "cpl_aqm_parm|task_nexus_emission|task_nexus_gfs_sfc" ${G
 #
 #-----------------------------------------------------------------------
 #
-{ save_shell_opts; . $USHaqm/preamble.sh; } > /dev/null 2>&1
+{ save_shell_opts; . $USHdir/preamble.sh; } > /dev/null 2>&1
 #
 #-----------------------------------------------------------------------
 #
@@ -152,7 +146,7 @@ fi
 
 if [ "${RUN_TASK_NEXUS_GFS_SFC}" = "TRUE" ]; then
   if [ -d "${GFS_SFC_INPUT}" ]; then
-    if [ "$(ls -A ${GFS_SFC_INPUT})" ]; then
+    if [ "$(ls -A ${GFS_SFC_INPUT}/gfs*.nc)" ]; then    #change to specificly look for gfs files
       ln -sf "${GFS_SFC_INPUT}" "GFS_SFC"
       USE_GFS_SFC="TRUE"
     fi
@@ -165,14 +159,14 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-cp ${EXECaqm}/nexus ${DATA}
+cp ${EXECdir}/nexus ${DATA}
 
 cp ${FIXaqmnexus}/${NEXUS_GRID_FN} ${DATA}/grid_spec.nc
 
 if [ "${USE_GFS_SFC}" = "TRUE" ]; then
-    cp ${ARL_NEXUS_DIR}/config/cmaq_gfs_megan/*.rc ${DATA}
+  cp ${PARMdir}/nexus_config/cmaq_gfs_megan/*.rc ${DATA}
 else
-    cp ${ARL_NEXUS_DIR}/config/cmaq/*.rc ${DATA}
+  cp ${PARMdir}/nexus_config/cmaq/*.rc ${DATA}
 fi
 #
 #-----------------------------------------------------------------------
@@ -242,22 +236,22 @@ NEXUS_INPUT_BASE_DIR=${COMINemis}
 # 
 # modify time configuration file
 #
-${ARL_NEXUS_DIR}/utils/python/nexus_time_parser.py -f ${DATA}/HEMCO_sa_Time.rc -s $start_date -e $end_date
+${USHdir}/nexus_utils/python/nexus_time_parser.py -f ${DATA}/HEMCO_sa_Time.rc -s $start_date -e $end_date
 export err=$?
 if [ $err -ne 0 ]; then
   message_txt="Call to python script \"nexus_time_parser.py\" failed."
-    err_exit "${message_txt}"
+  err_exit "${message_txt}"
 fi
 #
 #---------------------------------------------------------------------
 #
 # set the root directory to the temporary directory
 #
-${ARL_NEXUS_DIR}/utils/python/nexus_root_parser.py -f ${DATA}/NEXUS_Config.rc -d ${DATAinput}
+${USHdir}/nexus_utils/python/nexus_root_parser.py -f ${DATA}/NEXUS_Config.rc -d ${DATAinput}
 export err=$?
 if [ $err -ne 0 ]; then
   message_txt="Call to python script \"nexus_root_parser.py\" failed."
-    err_exit "${message_txt}"
+  err_exit "${message_txt}"
 fi
 #
 #----------------------------------------------------------------------
@@ -267,18 +261,18 @@ if [ "${NEI2016}" = "TRUE" ]; then #NEI2016
   mkdir -p ${DATAinput}/NEI2016v1
   mkdir -p ${DATAinput}/NEI2016v1/v2022-07
   mkdir -p ${DATAinput}/NEI2016v1/v2022-07/${mm}
-  ${ARL_NEXUS_DIR}/utils/python/nexus_nei2016_linker.py --src_dir ${NEXUS_INPUT_BASE_DIR} --date ${yyyymmdd} --work_dir ${DATAinput} -v "v2022-07"
+  ${USHdir}/nexus_utils/python/nexus_nei2016_linker.py --src_dir ${NEXUS_INPUT_BASE_DIR} --date ${yyyymmdd} --work_dir ${DATAinput} -v "v2022-07"
   export err=$?
   if [ $err -ne 0 ]; then
     message_txt="Call to python script \"nexus_nei2016_linker.py\" failed."
-      err_exit "${message_txt}"
+    err_exit "${message_txt}"
   fi
 
-  ${ARL_NEXUS_DIR}/utils/python/nexus_nei2016_control_tilefix.py -f ${DATA}/NEXUS_Config.rc -t ${DATA}/HEMCO_sa_Time.rc # -d ${yyyymmdd}
+  ${USHdir}/nexus_utils/python/nexus_nei2016_control_tilefix.py -f ${DATA}/NEXUS_Config.rc -t ${DATA}/HEMCO_sa_Time.rc # -d ${yyyymmdd}
   export err=$?
   if [ $err -ne 0 ]; then
     message_txt="Call to python script \"nexus_nei2016_control_tilefix.py\" failed."
-      err_exit "${message_txt}"
+    err_exit "${message_txt}"
   fi
 fi
 
@@ -344,11 +338,11 @@ fi
 
 if [ "${USE_GFS_SFC}" = "TRUE" ]; then # GFS INPUT
   mkdir -p ${DATAinput}/GFS_SFC
-  ${ARL_NEXUS_DIR}/utils/python/nexus_gfs_bio.py -i ${DATA}/GFS_SFC/gfs.t??z.sfcf???.nc -o ${DATA}/GFS_SFC_MEGAN_INPUT.nc
+  ${USHdir}/nexus_utils/python/nexus_gfs_bio.py -i ${DATA}/GFS_SFC/gfs.t??z.sfcf???.nc -o ${DATA}/GFS_SFC_MEGAN_INPUT.nc
   export err=$?
   if [ $err -ne 0 ]; then
     message_txt="Call to python script \"nexus_gfs_bio.py\" failed."
-      err_exit "${message_txt}"
+    err_exit "${message_txt}"
   fi
 fi
 
@@ -359,9 +353,11 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-startmsg
-eval ${RUN_CMD_AQM} ${EXECaqm}/nexus -c NEXUS_Config.rc -r grid_spec.nc -o NEXUS_Expt_split.nc ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
-export err=$?; err_chk
+PREP_STEP
+eval ${RUN_CMD_AQM} ${EXECdir}/nexus -c NEXUS_Config.rc -r grid_spec.nc -o NEXUS_Expt_split.nc ${REDIRECT_OUT_ERR}
+export err=$?
+  err_chk
+POST_STEP
 
 # 
 #-----------------------------------------------------------------------
@@ -370,12 +366,14 @@ export err=$?; err_chk
 #
 #-----------------------------------------------------------------------
 #
-${ARL_NEXUS_DIR}/utils/python/make_nexus_output_pretty.py --src ${DATA}/NEXUS_Expt_split.nc --grid ${DATA}/grid_spec.nc -o ${INPUT_DATA}/${NET}.${cycle}${dot_ensmem}.NEXUS_Expt_split.${nspt}.nc -t ${DATA}/HEMCO_sa_Time.rc
+${USHdir}/nexus_utils/python/make_nexus_output_pretty.py --src ${DATA}/NEXUS_Expt_split.nc --grid ${DATA}/grid_spec.nc -o ${DATA}/${NET}.${cycle}${dot_ensmem}.NEXUS_Expt_split.${nspt}.nc -t ${DATA}/HEMCO_sa_Time.rc
 export err=$?
 if [ $err -ne 0 ]; then
   message_txt="Call to python script \"make_nexus_output_pretty.py\" failed."
-    err_exit "${message_txt}"
+  err_exit "${message_txt}"
 fi
+
+cp "${DATA}/${NET}.${cycle}${dot_ensmem}.NEXUS_Expt_split.${nspt}.nc" ${INPUT_DATA}
 #
 #-----------------------------------------------------------------------
 #

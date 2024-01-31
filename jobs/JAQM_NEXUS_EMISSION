@@ -12,17 +12,17 @@ export USHaqm=${USHaqm:-${HOMEaqm}/ush}
 . $USHaqm/source_util_funcs.sh
 source_config_for_task "task_run_fcst|cpl_aqm_parm|task_nexus_emission|task_nexus_gfs_sfc" ${GLOBAL_VAR_DEFNS_FP}
 
-export DATAROOT="${DATAROOT:-${DATAROOT_dfv}}"
-export DATA=${DATA:-${DATAROOT}/${jobid}}
+#export DATAROOT="${DATAROOT:-${DATAROOT_dfv}}"
+#export DATA=${DATA:-${DATAROOT}/${jobid}}
 
-mkdir -p ${DATA}
-cd ${DATA}
+#mkdir -p ${DATA}
+#cd ${DATA}
 
 export cycle=${cycle:-t${cyc}z}
 export CDATE=${PDY}${cyc}
 
-setpdy.sh
-. ./PDY
+#setpdy.sh
+#. ./PDY
 
 . $USHaqm/job_preamble.sh
 
@@ -99,7 +99,8 @@ if [ "${RUN_TASK_NEXUS_GFS_SFC}" = "FALSE" ]; then
   export TIME_OFFSET_HRS=${NEXUS_GFS_SFC_OFFSET_HRS:-0}
   yyyymmdd=${PDY}
   hh=${cyc}
-  export GFS_SFC_CDATE=$( $DATE_UTIL --utc --date "${yyyymmdd} ${hh} UTC - ${TIME_OFFSET_HRS} hours" "+%Y%m%d%H" )
+#  export GFS_SFC_CDATE=$( $DATE_UTIL --utc --date "${yyyymmdd} ${hh} UTC - ${TIME_OFFSET_HRS} hours" "+%Y%m%d%H" )
+  export GFS_SFC_CDATE=`$NDATE  -${TIME_OFFSET_HRS} $PDY$cyc`
   SLASH_ENSMEM_SUBDIR=${SLASH_ENSMEM_SUBDIR:-""}
   export GFS_SFC_STAGING_DIR="${COMIN}${SLASH_ENSMEM_SUBDIR}/tmp_NEXUS_GFS_SFC}"
 fi

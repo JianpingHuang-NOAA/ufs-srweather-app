@@ -304,27 +304,27 @@ fire_species::
     SO2     0.0080     CO          KG/M2/S
     NH3     0.0150     CO          KG/M2/S
     CO      1.0000     CO          KG/M2/S
-    ACET    0.0000     CO          KG/M2/S
-    ALD2    0.0000     CO          KG/M2/S
-    ALDX    0.0000     CO          KG/M2/S
-    BENZ    0.0000     CO          KG/M2/S
-    CH4     0.0000     CO          KG/M2/S
-    ETH     0.0000     CO          KG/M2/S
-    ETHA    0.0000     CO          KG/M2/S
-    ETHY    0.0000     CO          KG/M2/S
-    ETOH    0.0000     CO          KG/M2/S
-    FORM    0.0000     CO          KG/M2/S
-    IOLE    0.0000     CO          KG/M2/S
-    ISOP    0.0000     CO          KG/M2/S
-    KET     0.0000     CO          KG/M2/S
-    MEOH    0.0000     CO          KG/M2/S
-    OLE     0.0000     CO          KG/M2/S
-    PAR     0.0000     CO          KG/M2/S
-    PRPA    0.0000     CO          KG/M2/S
-    TERP    0.0000     CO          KG/M2/S
-    TOL     0.0000     CO          KG/M2/S
-    UNR     0.0000     CO          KG/M2/S
-    XYL     0.0000     CO          KG/M2/S
+    ACET    0.001092   CO          KG/M2/S
+    ALD2    0.0009828  CO          KG/M2/S
+    ALDX    0.0030368  CO          KG/M2/S
+    BENZ    0.0009612  CO          KG/M2/S
+    CH4     0.0092508  CO          KG/M2/S
+    ETH     0.0022048  CO          KG/M2/S
+    ETHA    0.0011804  CO          KG/M2/S
+    ETHY    0.0005304  CO          KG/M2/S
+    ETOH    3.64e-05   CO          KG/M2/S
+    FORM    0.0043316  CO          KG/M2/S
+    IOLE    0.0004836  CO          KG/M2/S
+    ISOP    0.0001976  CO          KG/M2/S
+    KET     0.0002652  CO          KG/M2/S
+    MEOH    0.0039364  CO          KG/M2/S
+    OLE     0.0034424  CO          KG/M2/S
+    PAR     0.0074776  CO          KG/M2/S
+    PRPA    0.0004888  CO          KG/M2/S
+    TERP    0.0004316  CO          KG/M2/S
+    TOL     0.0013208  CO          KG/M2/S
+    UNR     0.0100516  CO          KG/M2/S
+    XYL     0.0002964  CO          KG/M2/S
     FRP     1000000    MeanFRP     1
 ::
 

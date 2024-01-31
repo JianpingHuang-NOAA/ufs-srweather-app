@@ -9,20 +9,21 @@ set -xue
 # Source the variable definitions file and the bash utility functions.
 #-----------------------------------------------------------------------
 export USHaqm=${USHaqm:-${HOMEaqm}/ush}
+#export PARMaqm=${PARMaqm:-${HOMEaqm}/parm}
 
 . $USHaqm/source_util_funcs.sh
 source_config_for_task "task_make_lbcs|task_get_extrn_lbcs" ${GLOBAL_VAR_DEFNS_FP}
 
-export DATAROOT="${DATAROOT:-${DATAROOT_dfv}}"
-export DATA=${DATA:-${DATAROOT}/${jobid}}
+#export DATAROOT="${DATAROOT:-${DATAROOT_dfv}}"
+#export DATA=${DATA:-${DATAROOT}/${jobid}}
 
-mkdir -p ${DATA}
-cd ${DATA}
+#mkdir -p ${DATA}
+#cd ${DATA}
 
 export cycle=${cycle:-t${cyc}z}
 
-setpdy.sh
-. ./PDY
+#setpdy.sh
+#. ./PDY
 
 export CDATE=${PDY}${cyc}
 

@@ -8,20 +8,21 @@ set -xue
 # Source the variable definitions file and the bash utility functions.
 #-----------------------------------------------------------------------
 export USHaqm=${USHaqm:-${HOMEaqm}/ush}
+export PARMaqm=${PARMaqm:-${HOMEaqm}/parm}
 
 . $USHaqm/source_util_funcs.sh
 source_config_for_task "task_make_ics|task_get_extrn_ics" ${GLOBAL_VAR_DEFNS_FP}
 
-export DATAROOT="${DATAROOT:-${DATAROOT_dfv}}"
-export DATA=${DATA:-${DATAROOT}/${jobid}}
+#export DATAROOT="${DATAROOT:-${DATAROOT_dfv}}"
+#export DATA=${DATA:-${DATAROOT}/${jobid}}
 
-mkdir -p ${DATA}
-cd ${DATA}
+#mkdir -p ${DATA}
+#cd ${DATA}
 
 export cycle=${cycle:-t${cyc}z}
 
-setpdy.sh
-. ./PDY
+#setpdy.sh
+#. ./PDY
 
 export CDATE=${PDY}${cyc}
 
@@ -88,6 +89,7 @@ mkdir -p ${INPUT_DATA}
 #-----------------------------------------------------------------------
 #
 DATA="${DATA:-${COMIN}${SLASH_ENSMEM_SUBDIR}/tmp_MAKE_ICS}"
+#DATA1="${${COMIN}${SLASH_ENSMEM_SUBDIR}/tmp_MAKE_ICS}"
 #
 #-----------------------------------------------------------------------
 # Set environment only when RUN_TASK_GET_EXTRN_ICS is false.
@@ -99,7 +101,9 @@ if [ "${RUN_TASK_GET_EXTRN_ICS}" = "FALSE" ]; then
   GFS_FILE_FMT=${FV3GFS_FILE_FMT_ICS}
   yyyymmdd=${PDY}
   hh=${cyc}
-  export EXTRN_MDL_CDATE=$( $DATE_UTIL --utc --date "${yyyymmdd} ${hh} UTC - ${TIME_OFFSET_HRS} hours" "+%Y%m%d%H" )
+  #export EXTRN_MDL_CDATE=$( $DATE_UTIL --utc --date "${yyyymmdd} ${hh} UTC - ${TIME_OFFSET_HRS} hours" "+%Y%m%d%H" )
+  export EXTRN_MDL_CDATE=`$NDATE  -${TIME_OFFSET_HRS} $PDY$cyc`
+
   export EXTRN_MDL_STAGING_DIR="${EXTRN_MDL_STAGING_DIR:-${DATA}}"
 fi
 #
