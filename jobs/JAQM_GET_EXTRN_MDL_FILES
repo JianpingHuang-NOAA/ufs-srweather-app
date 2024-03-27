@@ -185,9 +185,9 @@ export err=$?; err_chk
 msg="JOB ${job} HAS COMPLETED NORMALLY."
 postmsg "${msg}"
 #
-if [ "${KEEPDATA}" = "FALSE" ]; then
-   rm -rf ${DATA}
-fi
+#if [ "${KEEPDATA}" = "FALSE" ]; then
+#   rm -rf ${DATA}
+#fi
 #=======================================================================
 print_info_msg "
 #========================================================================
