@@ -89,6 +89,8 @@ fi
 #-----------------------------------------------------------------------
 #
 
+. prep_step
+
 if [ "${PREDEF_GRID_NAME}" = "AQM_NA_13km" ]; then
   id_domain=793
 fi
@@ -97,7 +99,7 @@ fi
 # aqm_pm25_post
 #---------------------------------------------------------------
 
-ln -sf ${COMIN}/${cyc}/${NET}.${cycle}.chem_sfc.nc .
+cpreq ${COMIN}/${cyc}/${NET}.${cycle}.chem_sfc.nc .
 
 cat >aqm_post.ini <<EOF1
 &control
@@ -112,48 +114,67 @@ EOF1
 startmsg
 eval ${RUN_CMD_SERIAL} ${EXECaqm}/aqm_post_grib2 ${PDY} ${cyc} ${REDIRECT_OUT_ERR}  >> $pgmout 2>errfile
 export err=$?; err_chk
+if [ -e "${pgmout}" ]; then
+   cat ${pgmout}
+fi
+cat ${NET}.${cycle}.pm25.*.${id_domain}.grib2 >> ${NET}.${cycle}.ave_1hr_pm25.${id_domain}.grib2
 
-cat ${NET}.${cycle}.pm25.*.${id_domain}.grib2 >> ${NET}.${cycle}.1hpm25.${id_domain}.grib2
+cpreq ${DATA}/${NET}.${cycle}.ave_1hr_pm25.${id_domain}.grib2 ${COMOUT}
+#if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
+#  if [ "$SENDDBN" = "YES" ]; then
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25.${id_domain}.grib2
+#  fi
+#fi
 
 export grid227="lambert:265.0000:25.0000:25.0000 226.5410:1473:5079.000 12.1900:1025:5079.000"
 #export grid148="lambert:263.0000:33.0000:45.0000 239.3720:442:12000.000 21.8210:265:12000.000"
-export grid196="mercator:20.0000 198.4750:321:2500.000:206.1310 18.0730:255:2500.000:23.0880"
+export grid196="mercator:20.0000 198.4750:321:2500.000:206.1310 18.0730:225:2500.000:23.0880"
 export grid198="nps:210.0000:60.0000 181.4290:825:5953.000 40.5300:553:5953.000"
 
 for grid in 227 196 198; do
   gg="grid${grid}"
-  wgrib2 ${NET}.${cycle}.1hpm25.${id_domain}.grib2 -set_grib_type c3b -new_grid_winds earth -new_grid ${!gg} ${NET}.${cycle}.1hpm25.${grid}.grib2
+  wgrib2 ${NET}.${cycle}.ave_1hr_pm25.${id_domain}.grib2 -set_grib_type c3b -new_grid_winds grid -new_grid ${!gg} ${NET}.${cycle}.tmp.ave_1hr_pm25.${grid}.grib2
+
+  # fix res flags
+  if [ "$grid" == "198" ] || [ "$grid" == "227" ]; then
+     wgrib2 -set_flag_table_3.3 8 "${NET}.${cycle}.tmp.ave_1hr_pm25.${grid}.grib2" -grib "${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2"
+  else
+     cp "${NET}.${cycle}.tmp.ave_1hr_pm25.${grid}.grib2" "${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2"
+  fi
 done
 
-cp ${DATA}/${NET}.${cycle}*pm25*.grib2 ${COMOUT}
-  
+cpreq ${DATA}/${NET}.${cycle}.ave*pm25*.grib2 ${COMOUT}
+
 # Create AWIPS GRIB2 data for Bias-Corrected PM2.5
 if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
   for grid in 227 198 196; do
     echo 0 > filesize
     export XLFRTEOPTS="unit_vars=yes"
-    export FORT11=${NET}.${cycle}.1hpm25.${grid}.grib2
+    export FORT11=${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2
     export FORT12="filesize"
-    export FORT31=
-    export FORT51=${NET}.${cycle}.1hpm25.${grid}.grib2.temp
-    tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_1hpm25.${cycle}.${grid}
+    #export FORT31=
+    export FORT51=${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2.temp
+    tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_1hpm25.${cycle}.${grid}
 				
-    echo `ls -l ${NET}.${cycle}.grib2_pm25.${grid}.temp  | awk '{print $5} '` > filesize
+    echo `ls -l ${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2.temp  | awk '{print $5} '` > filesize
     export XLFRTEOPTS="unit_vars=yes"
-    export FORT11=${NET}.${cycle}.1hpm25.${grid}.grib2.temp
+    export FORT11=${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2.temp
     export FORT12="filesize"
-    export FORT31=
+    #export FORT31=
     export FORT51=awpaqm.${cycle}.1hpm25.${grid}.grib2
-    tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_1hpm25.${cycle}.${grid}
+    tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_1hpm25.${cycle}.${grid}
 
-    # Post Files to PCOM
-    cp awpaqm.${cycle}.1hpm25.${grid}.grib2 ${PCOM}
+    if [ "$SENDDBN" = "YES" ]; then
+      ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25.${grid}.grib2
+    fi
 
-    # Distribute Data
-#    if [ "${SENDDBN_NTC}" = "TRUE" ] ; then
-#      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.1hpm25.${grid}.grib2 
-#      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2
-#    fi
+    # Post Files to COMOUTwmo
+    cpreq awpaqm.${cycle}.1hpm25.${grid}.grib2 ${COMOUTwmo}
+
+    if [ "$SENDDBN_NTC" = "YES" ]; then
+      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${COMOUTwmo}/awpaqm.${cycle}.1hpm25.${grid}.grib2
+    fi
+
   done
 fi
 
@@ -162,7 +183,7 @@ fi
 #---------------------------------------------------------------
 if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
 
-  ln -sf ${COMIN}/${cyc}/${NET}.${cycle}.chem_sfc.nc a.nc
+  cpreq ${COMIN}/${cyc}/${NET}.${cycle}.chem_sfc.nc a.nc
 
   export chk=1
   export chk1=1
@@ -181,9 +202,9 @@ EOF1
   # 06z needs b.nc to find current day output from 04Z to 06Z
   if [ "${cyc}" = "06" ]; then
     if [ -s ${COMIN}/00/${NET}.t00z.chem_sfc.nc ]; then
-      ln -sf  ${COMIN}/00/${NET}.t00z.chem_sfc.nc b.nc
+      cpreq  ${COMIN}/00/${NET}.t00z.chem_sfc.nc b.nc
     elif [ -s ${COMINm1}/12/${NET}.t12z.chem_sfc.nc ]; then
-      ln -sf ${COMINm1}/12/${NET}.t12z.chem_sfc.nc b.nc
+      cpreq ${COMINm1}/12/${NET}.t12z.chem_sfc.nc b.nc
       chk=0
     else
       flag_run_bicor_max=no
@@ -193,9 +214,9 @@ EOF1
   if [ "${cyc}" = "12" ]; then
     # 12z needs b.nc to find current day output from 04Z to 06Z
     if [ -s ${COMIN}/00/${NET}.t00z.chem_sfc.nc ]; then
-      ln -sf ${COMIN}/00/${NET}.t00z.chem_sfc.nc b.nc
+      cpreq ${COMIN}/00/${NET}.t00z.chem_sfc.nc b.nc
     elif [ -s ${COMINm1}/12/${NET}.t12z.chem_sfc.nc ]; then
-      ln -sf ${COMINm1}/12/${NET}.${PDYm1}.t12z.chem_sfc.nc b.nc
+      cpreq ${COMINm1}/12/${NET}.${PDYm1}.t12z.chem_sfc.nc b.nc
       chk=0
     else
       flag_run_bicor_max=no
@@ -203,9 +224,9 @@ EOF1
 
     # 12z needs c.nc to find current day output from 07Z to 12z
     if [ -s ${COMIN}/06/${NET}.t06z.chem_sfc.nc ]; then
-      ln -sf ${COMIN}/06/${NET}.t06z.chem_sfc.nc c.nc
+      cpreq ${COMIN}/06/${NET}.t06z.chem_sfc.nc c.nc
     elif [ -s ${COMINm1}/12/${NET}.t12z.chem_sfc.nc ]; then
-      ln -sf ${COMINm1}/12/${NET}.t12z.chem_sfc.nc c.nc
+      cpreq ${COMINm1}/12/${NET}.t12z.chem_sfc.nc c.nc
       chk1=0
     else
       flag_run_bicor_max=no
@@ -215,71 +236,88 @@ EOF1
   startmsg
   eval ${RUN_CMD_SERIAL} ${EXECaqm}/aqm_post_maxi_grib2 ${PDY} ${cyc} ${chk} ${chk1} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
   export err=$?; err_chk
+  if [ -e "${pgmout}" ]; then
+   cat ${pgmout}
+  fi
 
   wgrib2 ${NET}_pm25_24h_ave.${id_domain}.grib2 |grep "PMTF" | wgrib2 -i ${NET}_pm25_24h_ave.${id_domain}.grib2 -grib ${NET}.${cycle}.ave_24hr_pm25.${id_domain}.grib2
   wgrib2 ${NET}_pm25_24h_ave.${id_domain}.grib2 |grep "PDMAX1" | wgrib2 -i ${NET}_pm25_24h_ave.${id_domain}.grib2 -grib ${NET}.${cycle}.max_1hr_pm25.${id_domain}.grib2
 
+  cpreq ${DATA}/${NET}.${cycle}.ave_24hr_pm25.${id_domain}.grib2 ${COMOUT}
+  cpreq ${DATA}/${NET}.${cycle}.max_1hr_pm25.${id_domain}.grib2 ${COMOUT}
+
+#  if [ "$SENDDBN" = "YES" ]; then
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25.${id_domain}.grib2
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25.${id_domain}.grib2
+#  fi
+
   export grid227="lambert:265.0000:25.0000:25.0000 226.5410:1473:5079.000 12.1900:1025:5079.000"
-  export grid196="mercator:20.0000 198.4750:321:2500.000:206.1310 18.0730:255:2500.000:23.0880"
+  export grid196="mercator:20.0000 198.4750:321:2500.000:206.1310 18.0730:225:2500.000:23.0880"
   export grid198="nps:210.0000:60.0000 181.4290:825:5953.000 40.5300:553:5953.000"
 
   for grid in 227 196 198; do
     gg="grid${grid}"
-    wgrib2 ${NET}.${cycle}.ave_24hr_pm25.${id_domain}.grib2 -set_grib_type c3b -new_grid_winds earth -new_grid ${!gg} ${NET}.${cycle}.24hrpm25-ave.${grid}.grib2
-    wgrib2 ${NET}.${cycle}.max_1hr_pm25.${id_domain}.grib2 -set_grib_type c3b -new_grid_winds earth -new_grid ${!gg} ${NET}.${cycle}.1hpm25-max.${grid}.grib2
+    wgrib2 ${NET}.${cycle}.ave_24hr_pm25.${id_domain}.grib2 -set_grib_type c3b -new_grid_winds grid -new_grid ${!gg} ${NET}.${cycle}.tmp.ave_24hr_pm25.${grid}.grib2
+    wgrib2 ${NET}.${cycle}.max_1hr_pm25.${id_domain}.grib2 -set_grib_type c3b -new_grid_winds grid -new_grid ${!gg} ${NET}.${cycle}.tmp.max_1hr_pm25.${grid}.grib2
 
+    # fix res flags
+    if [ "$grid" == "198" ] || [ "$grid" == "227" ]; then 
+       wgrib2 -set_flag_table_3.3 8 "${NET}.${cycle}.tmp.ave_24hr_pm25.${grid}.grib2" -grib "${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2"
+       wgrib2 -set_flag_table_3.3 8 "${NET}.${cycle}.tmp.max_1hr_pm25.${grid}.grib2" -grib "${NET}.${cycle}.max_1hr_pm25.${grid}.grib2"
+    else
+       cp "${NET}.${cycle}.tmp.ave_24hr_pm25.${grid}.grib2" "${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2"
+       cp "${NET}.${cycle}.tmp.max_1hr_pm25.${grid}.grib2" "${NET}.${cycle}.max_1hr_pm25.${grid}.grib2"
+    fi  
+
+    cpreq ${DATA}/${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2 ${COMOUT}
+    cpreq ${DATA}/${NET}.${cycle}.max_1hr_pm25.${grid}.grib2 ${COMOUT}
+
+    if [ "$SENDDBN" = "YES" ]; then
+      ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2
+      ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25.${grid}.grib2
+    fi   
+			
     # Add WMO header for daily 1h PM2.5 and 24hr_ave PM2.5
     rm -f filesize
     echo 0 > filesize
     export XLFRTEOPTS="unit_vars=yes"
-    export FORT11=${NET}.${cycle}.1hpm25-max.${grid}.grib2
+    export FORT11=${NET}.${cycle}.max_1hr_pm25.${grid}.grib2
     export FORT12="filesize"
-    export FORT31=
     export FORT51=${NET}.${cycle}.max_1hr_pm25.${grid}.grib2.temp
-    tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}
+    tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}
 
     echo `ls -l  ${NET}.${cycle}.max_1hr_pm25.${grid}.grib2.temp | awk '{print $5} '` > filesize
     export XLFRTEOPTS="unit_vars=yes"
     export FORT11=${NET}.${cycle}.max_1hr_pm25.${grid}.grib2.temp
     export FORT12="filesize"
-    export FORT31=
     export FORT51=awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2
-    tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}
+    tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}
 
     rm -f filesize
     echo 0 > filesize
     export XLFRTEOPTS="unit_vars=yes"
-    export FORT11=${NET}.${cycle}.24hrpm25-ave.${grid}.grib2
+    export FORT11=${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2
     export FORT12="filesize"
-    export FORT31=
-    export FORT51=${NET}.${cycle}.24hrpm25-ave.${grid}.grib2.temp
-    tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_ave_24hrpm25_awp.${cycle}.${grid}
+    export FORT51=${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2.temp
+    tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_ave_24hrpm25_awp.${cycle}.${grid}
 
-    echo `ls -l  ${NET}.${cycle}.24hrpm25-ave.${grid}.grib2.temp | awk '{print $5} '` > filesize
+    echo `ls -l  ${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2.temp | awk '{print $5} '` > filesize
     export XLFRTEOPTS="unit_vars=yes"
-    export FORT11=${NET}.${cycle}.24hrpm25-ave.${grid}.grib2.temp
+    export FORT11=${NET}.${cycle}.ave_24hr_pm25.${grid}.grib2.temp
     export FORT12="filesize"
-    export FORT31=
     export FORT51=awpaqm.${cycle}.24hr-pm25-ave.${grid}.grib2
-    tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_ave_24hrpm25_awp.${cycle}.${grid}
+    tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_ave_24hrpm25_awp.${cycle}.${grid}
     
-    cp ${DATA}/${NET}.${cycle}.ave_24hr_pm25*.grib2 ${COMOUT}
-    cp ${DATA}/${NET}.${cycle}.max_1hr_pm25*.grib2 ${COMOUT}
-    cp awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2 ${PCOM}
-    cp awpaqm.${cycle}.24hr-pm25-ave.${grid}.grib2 ${PCOM}
+    cpreq awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2 ${COMOUTwmo}
+    cpreq awpaqm.${cycle}.24hr-pm25-ave.${grid}.grib2 ${COMOUTwmo}
 
     ##############################
     # Distribute Data
     ##############################
 
-    if [ "${SENDDBN_NTC}" = "TRUE" ] ; then
-      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.1hpm25.${grid}.grib2 
-      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2
-    fi
-
-    if [ "$SENDDBN" = "TRUE" ]; then
-      ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${PCOM}/awpaqm.${cycle}.24hr-pm25-ave.${grid}.grib2
-      ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${PCOM}/awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2
+    if [ "${SENDDBN_NTC}" = "YES" ] ; then
+      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${COMOUTwmo}/awpaqm.${cycle}.24hr-pm25-ave.${grid}.grib2 
+      ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${COMOUTwmo}/awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2
     fi
   done
 fi
