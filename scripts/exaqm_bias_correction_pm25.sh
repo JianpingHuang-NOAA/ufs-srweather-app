@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -xe
+set -x
 
 msg="JOB $job HAS BEGUN"
 postmsg "$msg"
@@ -143,7 +143,8 @@ mkdir -p "${DATA}/data"
 
     mkdir -p "${cvt_input_dir}/${cvt_yyyy}/${cvt_pdy}"
     mkdir -p "${cvt_output_dir}/${cvt_yyyy}/${cvt_pdy}"
-    if [ "$(ls -A ${DCOMINairnow}/${cvt_pdy}/airnow)" ]; then
+    #jp if [ "$(ls -A ${DCOMINairnow}/${cvt_pdy}/airnow)" ]; then
+    if [ -s ${DCOMINairnow}/${cvt_pdy}/airnow/HourlyAQObs_${cvt_pdy}00.dat ]; then
       cp ${DCOMINairnow}/${cvt_pdy}/airnow/HourlyAQObs_${cvt_pdy}*.dat "${cvt_input_dir}/${cvt_yyyy}/${cvt_pdy}"
     else
       message_warning="WARNING: airnow data missing. skip this date ${cvt_pdy}"
@@ -153,6 +154,9 @@ mkdir -p "${DATA}/data"
     startmsg
     eval ${RUN_CMD_SERIAL} ${EXECaqm}/convert_airnow_csv ${cvt_input_fp} ${cvt_output_fp} ${cvt_pdy} ${cvt_pdy} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
     export err=$?; err_chk
+    if [ -e "${pgmout}" ]; then
+      cat ${pgmout}
+    fi
   done
 
 #-----------------------------------------------------------------------------
@@ -166,6 +170,7 @@ while [ $ic -lt 120 ]; do
     echo "cycle ${cyc} post1 is done!"
     break
   else  
+    sleep 10
     (( ic=ic+1 ))
   fi    
 done    
@@ -181,8 +186,8 @@ if [ -d "${DATA_grid}/${cyc}z/${PDY}" ]; then
 fi
 
 mkdir -p "${DATA_grid}/${cyc}z/${PDY}"
-ln -sf ${COMIN}/${cyc}/${NET}.${cycle}.chem_sfc.*.nc ${DATA_grid}/${cyc}z/${PDY}
-ln -sf ${COMIN}/${cyc}/${NET}.${cycle}.met_sfc.*.nc ${DATA_grid}/${cyc}z/${PDY}
+cpreq ${COMIN}/${cyc}/${NET}.${cycle}.chem_sfc.*.nc ${DATA_grid}/${cyc}z/${PDY}
+cpreq ${COMIN}/${cyc}/${NET}.${cycle}.met_sfc.*.nc ${DATA_grid}/${cyc}z/${PDY}
 
 #-----------------------------------------------------------------------
 # STEP 3:  Intepolating CMAQ PM2.5 into AIRNow sites
@@ -193,19 +198,63 @@ mkdir -p ${DATA}/data/site-lists.interp
 mkdir -p ${DATA}/out/pm25/${yyyy}
 mkdir -p ${DATA}/data/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
 
-cp ${PARMaqm_utils}/bias_correction/sites.valid.pm25.20230331.12z.list ${DATA}/data/site-lists.interp
-cp ${PARMaqm_utils}/bias_correction/aqm.t12z.chem_sfc.f000.nc ${DATA}/data/coords
-cp ${PARMaqm_utils}/bias_correction/config.interp.pm2.5.5-vars_${id_domain}.${cyc}z ${DATA}
+cpreq ${PARMaqm}/aqm_utils/bias_correction/sites.valid.pm25.20230331.12z.list ${DATA}/data/site-lists.interp
+cpreq ${PARMaqm}/aqm_utils/bias_correction/aqm.t12z.chem_sfc.f000.nc ${DATA}/data/coords
+cpreq ${PARMaqm}/aqm_utils/bias_correction/config.interp.pm2.5.5-vars_${id_domain}.${cyc}z ${DATA}
 
 startmsg
 eval ${RUN_CMD_SERIAL} ${EXECaqm}/aqm_bias_interpolate config.interp.pm2.5.5-vars_${id_domain}.${cyc}z ${cyc}z ${PDY} ${PDY} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
 export err=$? err_chk
-
-cp ${DATA}/out/pm25/${yyyy}/*nc ${DATA}/data/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
+if [ -e "${pgmout}" ]; then
+   cat ${pgmout}
+fi
+cpreq ${DATA}/out/pm25/${yyyy}/*nc ${DATA}/data/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
 
 if [ "${DO_AQM_SAVE_AIRNOW_HIST}" = "TRUE" ]; then
-mkdir -p  ${COMOUTbicor}/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
-cp ${DATA}/out/pm25/${yyyy}/*nc ${COMOUTbicor}/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
+
+   # NetCDF files
+   for i in {1..3}; do
+      yyyymm_m="yyyymm_m${i}"
+      yyyy_m="yyyy_m${i}"
+      PDYm="PDYm${i}"
+
+      target_dir="${COMOUTbicor}/bcdata.${!yyyymm_m}/airnow/netcdf/${!yyyy_m}/${!PDYm}"
+
+      if [ ! -d "$target_dir" ]; then
+           mkdir -p "$target_dir"
+      fi
+
+      # Check if the file exists before attempting to copy it
+      if [ -s "${DATA}/data/bcdata.${!yyyymm_m}/airnow/netcdf/${!yyyy_m}/${!PDYm}/HourlyAQObs.${!PDYm}.nc" ]; then
+          cp "${DATA}/data/bcdata.${!yyyymm_m}/airnow/netcdf/${!yyyy_m}/${!PDYm}/HourlyAQObs.${!PDYm}.nc" "${COMOUTbicor}/bcdata.${!yyyymm_m}/airnow/netcdf/${!yyyy_m}/${!PDYm}"
+       else
+           message_warning="WARNING: File not found: HourlyAQObs.${!PDYm}.nc"
+           print_info_msg "${message_warning}"
+       fi
+    done
+
+   mkdir -p  ${COMOUTbicor}/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
+   cp ${DATA}/out/pm25/${yyyy}/*nc ${COMOUTbicor}/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
+
+
+   mkdir -p  "${COMOUTbicor}/bcdata.${yyyymm}/grid/${cyc}z/${PDY}"
+   cpreq ${COMIN}/${cyc}/${NET}.${cycle}.*_sfc.f*.nc ${COMOUTbicor}/bcdata.${yyyymm}/grid/${cyc}z/${PDY}
+
+   # Check if the directory exists before creating it
+   if [ ! -d "${COMOUTbicor}/bcdata.${yyyymm}/grid/${cyc}z/${PDY}" ]; then
+       mkdir -p "${COMOUTbicor}/bcdata.${yyyymm}/grid/${cyc}z/${PDY}"
+   fi
+   
+   # Loop through files and copy each one individually if it exists
+    for file in ${COMIN}/${cyc}/${NET}.${cycle}.*_sfc.f*.nc; do
+      if [ -f "$file" ]; then
+          cpreq "$file" "${COMOUTbicor}/bcdata.${yyyymm}/grid/${cyc}z/${PDY}"
+      else
+          message_warning="WARNING: File not found: ${NET}.${cycle}.*_sfc.f*.nc"
+          print_info_msg "${message_warning}"
+      fi
+    done
+
 fi
 
 #-----------------------------------------------------------------------
@@ -215,27 +264,35 @@ fi
 rm -rf ${DATA}/data/bcdata*
 
 ln -sf ${COMINbicor}/bcdata* "${DATA}/data"
+#if [ $(find . -xtype l|wc -l) -gt 0 ]; then
+if [ $(find "${DATA}/data" -xtype l | wc -l) -gt 0 ]; then
+  message_txt="FATAL ERROR broken file or dir link found under ${DATA}"
+  err_exit "${message_txt}"
+fi 
+
 
 mkdir -p ${DATA}/data/sites
 
-cp ${PARMaqm_utils}/bias_correction/config.pm2.5.bias_corr_${id_domain}.${cyc}z ${DATA}
-cp ${PARMaqm_utils}/bias_correction/site_blocking.pm2.5.2021.0427.2-sites.txt ${DATA}
-cp ${PARMaqm_utils}/bias_correction/bias_thresholds.pm2.5.2015.1030.32-sites.txt ${DATA}
+cpreq ${PARMaqm}/aqm_utils/bias_correction/config.pm2.5.bias_corr_${id_domain}.${cyc}z ${DATA}
+cpreq ${PARMaqm}/aqm_utils/bias_correction/site_blocking.pm2.5.2021.0427.2-sites.txt ${DATA}
+cpreq ${PARMaqm}/aqm_utils/bias_correction/bias_thresholds.pm2.5.2015.1030.32-sites.txt ${DATA}
 
 eval ${RUN_CMD_SERIAL} ${EXECaqm}/aqm_bias_correct config.pm2.5.bias_corr_${id_domain}.${cyc}z ${cyc}z ${BC_STDAY} ${PDY} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
 export err=$?; err_chk
-
-cp $DATA/out/pm2.5.corrected* ${COMOUT}
+if [ -e "${pgmout}" ]; then
+   cat ${pgmout}
+fi
+cpreq $DATA/out/pm2.5.corrected* ${COMOUT}
 
 if [ "${cyc}" = "12" ]; then
-  cp ${DATA}/data/sites/sites.valid.pm25.${PDY}.${cyc}z.list ${DATA}
+  cpreq ${DATA}/data/sites/sites.valid.pm25.${PDY}.${cyc}z.list ${DATA}
 fi
 
 #------------------------------------------------------------------------
 # STEP 5:  converting netcdf to grib format
 #------------------------------------------------------------------------
 
-ln -sf ${COMIN}/${cyc}/pm2.5.corrected.${PDY}.${cyc}z.nc .
+cpreq ${COMIN}/${cyc}/pm2.5.corrected.${PDY}.${cyc}z.nc .
 
 # convert from netcdf to grib2 format
 cat >bias_cor.ini <<EOF1
@@ -250,15 +307,19 @@ EOF1
 startmsg 
 eval ${RUN_CMD_SERIAL} ${EXECaqm}/aqm_post_bias_cor_grib2 ${PDY} ${cyc} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
 export err=$?; err_chk
-
-cp ${DATA}/${NET}.${cycle}.pm25*bc*.grib2 ${COMOUT}
+if [ -e "${pgmout}" ]; then
+   cat ${pgmout}
+fi
+cpreq ${DATA}/${NET}.${cycle}.pm25*bc*.grib2 ${COMOUT}
 
 #-----------------------------------------------------------------------
 # STEP 6: calculating 24-hr ave PM2.5
 #------------------------------------------------------------------------
 
+. prep_step
+
 if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
-  ln -sf ${COMOUT}/pm2.5.corrected.${PDY}.${cyc}z.nc  a.nc 
+  cpreq ${COMOUT}/pm2.5.corrected.${PDY}.${cyc}z.nc  a.nc 
 
   chk=1 
   chk1=1 
@@ -276,9 +337,9 @@ EOF1
   # 06z needs b.nc to find current day output from 04Z to 06Z
   if [ "${cyc}" = "06" ]; then
     if [ -s ${COMIN}/00/pm2.5.corrected.${PDY}.00z.nc ]; then
-      ln -sf ${COMIN}/00/pm2.5.corrected.${PDY}.00z.nc  b.nc 
+      cpreq ${COMIN}/00/pm2.5.corrected.${PDY}.00z.nc  b.nc 
     elif [ -s ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc ]; then
-      ln -sf ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc  b.nc
+      cpreq ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc  b.nc
       chk=0
     else 
       flag_run_bicor_max=no
@@ -288,9 +349,9 @@ EOF1
   if [ "${cyc}" = "12" ]; then
     # 12z needs b.nc to find current day output from 04Z to 06Z
     if [ -s ${COMIN}/00/pm2.5.corrected.${PDY}.00z.nc ]; then
-      ln -sf ${COMIN}/00/pm2.5.corrected.${PDY}.00z.nc  b.nc
+      cpreq ${COMIN}/00/pm2.5.corrected.${PDY}.00z.nc  b.nc
     elif [ -s ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc ]; then
-      ln -sf ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc  b.nc
+      cpreq ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc  b.nc
       chk=0
     else
       flag_run_bicor_max=no
@@ -298,9 +359,9 @@ EOF1
 
     # 12z needs c.nc to find current day output from 07Z to 12z
     if [ -s ${COMIN}/06/pm2.5.corrected.${PDY}.06z.nc ]; then
-      ln -sf ${COMIN}/06/pm2.5.corrected.${PDY}.06z.nc c.nc
+      cpreq ${COMIN}/06/pm2.5.corrected.${PDY}.06z.nc c.nc
     elif [ -s ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc ]; then
-      ln -sf ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc  c.nc
+      cpreq ${COMINm1}/12/pm2.5.corrected.${PDYm1}.12z.nc  c.nc
       chk1=0
     else
       flag_run_bicor_max=no
@@ -313,34 +374,42 @@ EOF1
     startmsg
     eval ${RUN_CMD_SERIAL} ${EXECaqm}/aqm_post_maxi_bias_cor_grib2  ${PDY} ${cyc} ${chk} ${chk1} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
     export err=$?; err_chk
-
+    if [ -e "${pgmout}" ]; then
+      cat ${pgmout}
+    fi
     # split into two files: one for 24hr_ave and one for 1h_max
     wgrib2 aqm-pm25_bc.${id_domain}.grib2  |grep  "PMTF"   | ${WGRIB2} -i  aqm-pm25_bc.${id_domain}.grib2  -grib aqm.t${cyc}z.ave_24hr_pm25_bc.793.grib2 
     wgrib2 aqm-pm25_bc.${id_domain}.grib2  |grep  "PDMAX1" | ${WGRIB2} -i  aqm-pm25_bc.${id_domain}.grib2  -grib aqm.t${cyc}z.max_1hr_pm25_bc.793.grib2 
    
-    cp ${DATA}/${NET}.${cycle}.ave_24hr_pm25_bc.${id_domain}.grib2 ${COMOUT}
-    cp ${DATA}/${NET}.${cycle}.max_1hr_pm25_bc.${id_domain}.grib2 ${COMOUT}
+    cpreq ${DATA}/${NET}.${cycle}.ave_24hr_pm25_bc.${id_domain}.grib2 ${COMOUT}
+    cpreq ${DATA}/${NET}.${cycle}.max_1hr_pm25_bc.${id_domain}.grib2 ${COMOUT}
   fi
 
   # interpolate to grid 227
   oldgrib2file1=${NET}.${cycle}.ave_24hr_pm25_bc.${id_domain}.grib2
-  newgrib2file1=${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2
+  newgrib2file1=${NET}.${cycle}.tmp.ave_24hr_pm25_bc.227.grib2
 
   grid227="lambert:265.0000:25.0000:25.0000 226.5410:1473:5079.000 12.1900:1025:5079.000"
-  wgrib2 ${oldgrib2file1} -set_grib_type c3b -new_grid_winds earth -new_grid ${grid227}  ${newgrib2file1} 
+  wgrib2 ${oldgrib2file1} -set_grib_type c3b -new_grid_winds grid -new_grid ${grid227}  ${newgrib2file1} 
 
   oldgrib2file2=${NET}.${cycle}.max_1hr_pm25_bc.${id_domain}.grib2
-  newgrib2file2=${NET}.${cycle}.max_1hr_pm25_bc.227.grib2
-  wgrib2 ${oldgrib2file2} -set_grib_type c3b -new_grid_winds earth -new_grid ${grid227}  ${newgrib2file2}
+  newgrib2file2=${NET}.${cycle}.tmp.max_1hr_pm25_bc.227.grib2
+  wgrib2 ${oldgrib2file2} -set_grib_type c3b -new_grid_winds grid -new_grid ${grid227}  ${newgrib2file2}
 
-  cp ${NET}.${cycle}.max_1hr_pm25_bc.${id_domain}.grib2   ${COMOUT}
-  cp ${NET}.${cycle}.ave_24hr_pm25_bc.${id_domain}.grib2  ${COMOUT}
-  cp ${NET}.${cycle}.max_1hr_pm25_bc.227.grib2   ${COMOUT}
-  cp ${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2  ${COMOUT}
+  # fix res flags
+  wgrib2 -set_flag_table_3.3 8 "${newgrib2file1}" -grib "${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2"
+  wgrib2 -set_flag_table_3.3 8 "${newgrib2file2}" -grib "${NET}.${cycle}.max_1hr_pm25_bc.227.grib2"
 
-  if [ "${SENDDBN}" = "TRUE" ]; then
+  cpreq ${NET}.${cycle}.max_1hr_pm25_bc.${id_domain}.grib2   ${COMOUT}
+  cpreq ${NET}.${cycle}.ave_24hr_pm25_bc.${id_domain}.grib2  ${COMOUT}
+  cpreq ${NET}.${cycle}.max_1hr_pm25_bc.227.grib2   ${COMOUT}
+  cpreq ${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2  ${COMOUT}
+
+  if [ "${SENDDBN}" = "YES" ]; then
     ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25_bc.227.grib2
     ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25_bc.793.grib2
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25_bc.793.grib2
   fi
 fi
 
@@ -352,12 +421,18 @@ while [ "${fhr}" -le "${FCST_LEN_HRS}" ]; do
 done
 
 grid227="lambert:265.0000:25.0000:25.0000 226.5410:1473:5079.000 12.1900:1025:5079.000"
-wgrib2 tmpfile_pm25_bc -set_grib_type c3b -new_grid_winds earth -new_grid ${grid227} ${NET}.${cycle}.grib2_pm25_bc.227
+wgrib2 tmpfile_pm25_bc -set_grib_type c3b -new_grid_winds grid -new_grid ${grid227} ${NET}.${cycle}.tmp.grib2_pm25_bc.227
 
-cp tmpfile_pm25_bc ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.${id_domain}.grib2
-cp ${NET}.${cycle}.grib2_pm25_bc.227 ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.227.grib2
-if [ "${SENDDBN}" = "TRUE" ]; then
+# fix res flags
+wgrib2 -set_flag_table_3.3 8 "${NET}.${cycle}.tmp.grib2_pm25_bc.227" -grib "${NET}.${cycle}.grib2_pm25_bc.227"
+
+cpreq tmpfile_pm25_bc ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.${id_domain}.grib2
+cpreq ${NET}.${cycle}.grib2_pm25_bc.227 ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.227.grib2
+if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
+ if [ "${SENDDBN}" = "YES" ]; then
   ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.227.grib2
+#  ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.793.grib2
+ fi
 fi
 
 #--------------------------------------------------------------
@@ -370,17 +445,15 @@ if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
   export XLFRTEOPTS="unit_vars=yes"
   export FORT11=${NET}.${cycle}.grib2_pm25_bc.227
   export FORT12="filesize"
-  export FORT31=
   export FORT51=${NET}.${cycle}.grib2_pm25_bc.227.temp
-  tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_pm25_bc.${cycle}.227
+  tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_pm25_bc.${cycle}.227
 
   echo `ls -l ${NET}.${cycle}.grib2_pm25_bc.227.temp  | awk '{print $5} '` > filesize
   export XLFRTEOPTS="unit_vars=yes"
   export FORT11=${NET}.${cycle}.grib2_pm25_bc.227.temp
   export FORT12="filesize"
-  export FORT31=
   export FORT51=awpaqm.${cycle}.1hpm25-bc.227.grib2
-  tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_pm25_bc.${cycle}.227
+  tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_pm25_bc.${cycle}.227
 
   ####################################################
   rm -f filesize
@@ -388,17 +461,15 @@ if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
   export XLFRTEOPTS="unit_vars=yes"
   export FORT11=${NET}.${cycle}.max_1hr_pm25_bc.227.grib2
   export FORT12="filesize"
-  export FORT31=
   export FORT51=${NET}.${cycle}.max_1hr_pm25_bc.227.grib2.temp
-  tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_max_1hr_pm25_bc.${cycle}.227
+  tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25_bc.${cycle}.227
 
   echo `ls -l  ${NET}.${cycle}.max_1hr_pm25_bc.227.grib2.temp | awk '{print $5} '` > filesize
   export XLFRTEOPTS="unit_vars=yes"
   export FORT11=${NET}.${cycle}.max_1hr_pm25_bc.227.grib2.temp
   export FORT12="filesize"
-  export FORT31=
   export FORT51=awpaqm.${cycle}.daily-1hr-pm25-max-bc.227.grib2
-  tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_max_1hr_pm25_bc.${cycle}.227
+  tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25_bc.${cycle}.227
 
   rm -f filesize
   # daily_24hr_ave_PM2.5
@@ -406,28 +477,26 @@ if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
   export XLFRTEOPTS="unit_vars=yes"
   export FORT11=${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2
   export FORT12="filesize"
-  export FORT31=
   export FORT51=${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2.temp
-  tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_ave_24hrpm25_bc_awp.${cycle}.227
+  tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_ave_24hrpm25_bc_awp.${cycle}.227
 
   echo `ls -l  ${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2.temp | awk '{print $5} '` > filesize
   export XLFRTEOPTS="unit_vars=yes"
   export FORT11=${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2.temp
   export FORT12="filesize"
-  export FORT31=
   export FORT51=awpaqm.${cycle}.24hr-pm25-ave-bc.227.grib2
-  tocgrib2super < ${PARMaqm_utils}/wmo/grib2_aqm_ave_24hrpm25_bc_awp.${cycle}.227
+  tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_ave_24hrpm25_bc_awp.${cycle}.227
 
-  # Post Files to PCOM
-  cp awpaqm.${cycle}.1hpm25-bc.227.grib2             ${PCOM}
-  cp awpaqm.${cycle}.daily-1hr-pm25-max-bc.227.grib2 ${PCOM}
-  cp awpaqm.${cycle}.24hr-pm25-ave-bc.227.grib2      ${PCOM}
+  # Post Files to COMOUTwmo
+  cpreq awpaqm.${cycle}.1hpm25-bc.227.grib2             ${COMOUTwmo}
+  cpreq awpaqm.${cycle}.daily-1hr-pm25-max-bc.227.grib2 ${COMOUTwmo}
+  cpreq awpaqm.${cycle}.24hr-pm25-ave-bc.227.grib2      ${COMOUTwmo}
 
   # Distribute Data
-  if [ "${SENDDBN_NTC}" = "TRUE" ] ; then
-    ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.1hpm25-bc.227.grib2
-    ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.daily-1hr-pm25-max-bc.227.grib2
-    ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${PCOM}/awpaqm.${cycle}.24hr-pm25-ave-bc.227.grib2
+  if [ "${SENDDBN_NTC}" = "YES" ] ; then
+    ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${COMOUTwmo}/awpaqm.${cycle}.1hpm25-bc.227.grib2
+    ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${COMOUTwmo}/awpaqm.${cycle}.daily-1hr-pm25-max-bc.227.grib2
+    ${DBNROOT}/bin/dbn_alert ${DBNALERT_TYPE} ${NET} ${job} ${COMOUTwmo}/awpaqm.${cycle}.24hr-pm25-ave-bc.227.grib2
   fi
 fi
 
