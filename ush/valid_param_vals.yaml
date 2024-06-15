@@ -29,6 +29,7 @@ valid_vals_PREDEF_GRID_NAME: [
 "GSD_HRRR_AK_50km",
 "GSD_HRRR_25km",
 "AQM_NA_13km",
+"AQM_NA_9km",
 "RRFS_NA_13km",
 "RRFS_NA_3km",
 "SUBCONUS_Ind_3km",
