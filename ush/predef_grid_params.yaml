@@ -886,12 +886,12 @@
   ESGgrid_NY: 768
   ESGgrid_PAZI: 0.0
   ESGgrid_WIDE_HALO_WIDTH: 6
-  DT_ATMOS: 120
-  LAYOUT_X: 72
-  LAYOUT_Y: 48
+  DT_ATMOS: 150
+  LAYOUT_X: 64
+  LAYOUT_Y: 68
   BLOCKSIZE: 16
   QUILTING:
-    WRTCMP_write_groups: 2
+    WRTCMP_write_groups: 4
     WRTCMP_write_tasks_per_group: 64
     WRTCMP_output_grid: "rotated_latlon"
     WRTCMP_cen_lon: -118.0
