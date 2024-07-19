@@ -166,7 +166,7 @@ dust_species::
     CLAYF       1.00000   clayfrac     1
     SANDF       1.00000   sandfrac     1
     DRAG        1.00000   albedo_drag  1
-    UTHR        1.00000   uthres       1
+    UTHR        1.00000   uthres_bnu   1
 ::
 
 #
