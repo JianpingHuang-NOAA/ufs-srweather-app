@@ -637,7 +637,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
- $USHaqm/create_nems_configure_file.py \
+ $USHaqm/create_ufs_configure_file.py \
   --path-to-defns ${GLOBAL_VAR_DEFNS_FP} \
   --run-dir "${DATA}"
 export err=$?
