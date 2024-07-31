@@ -34,7 +34,6 @@ from python_utils import (
 
 from set_cycle_dates import set_cycle_dates
 from set_predef_grid_params import set_predef_grid_params
-from set_ozone_param import set_ozone_param
 from set_gridparams_ESGgrid import set_gridparams_ESGgrid
 from set_gridparams_GFDLgrid import set_gridparams_GFDLgrid
 from link_fix import link_fix
@@ -1012,7 +1011,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     #   (3) The field table file
     #   (4) The FV3 namelist file
     #   (5) The model configuration file
-    #   (6) The NEMS configuration file
+    #   (6) The UFS configuration file
     #   (7) The CCPP physics suite definition file
     #
     # The workflow contains templates for the first six of these files.
@@ -1059,43 +1058,6 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
               FIELD_DICT_IN_UWM_FP = '{field_dict_in_uwm_fp}'"""
         )
 
-    fixed_files = expt_config["fixed_files"]
-    # Set the appropriate ozone production/loss file paths and symlinks
-    #jp ozone_param, fixgsm_ozone_fn, ozone_link_mappings = set_ozone_param(
-    #jp    ccpp_phys_suite_in_ccpp_fp,
-    #jp    fixed_files["CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING"],
-    #jp)
-
-    # Reset the dummy value saved in the last list item to the ozone
-    # file name
-    #jp fixed_files["FIXgsm_FILES_TO_COPY_TO_FIXam"][-1] = fixgsm_ozone_fn
-
-    # Reset the experiment config list with the update list
-    #jp fixed_files["CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING"] = ozone_link_mappings
-
-    #jp0 log_info(
-    #    f"""
-    #    The ozone parameter used for this experiment is {ozone_param}.
-    #    """
-    #jp9)
-
-    log_info(
-        f"""
-        The list that sets the mapping between symlinks in the cycle
-        directory, and the files in the FIXam directory has been updated
-        to include the ozone production/loss file.
-        """,
-        verbose=verbose,
-    )
-
-    #jp0 log_info(
-    #    f"""
-    #    CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING = {list_to_str(ozone_link_mappings)}
-    #    """,
-    #    verbose=verbose,
-    #    dedent_=False,
-    #jp9 )
-
     #
     # -----------------------------------------------------------------------
     #
@@ -1104,7 +1066,6 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     #
     # -----------------------------------------------------------------------
     #
-
     # Ensemble verification can only be run in ensemble mode
     do_ensemble = global_sect["DO_ENSEMBLE"]
     run_task_vx_ensgrid = workflow_switches["RUN_TASK_VX_ENSGRID"]
@@ -1119,12 +1080,12 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         )
 
     # Temporary solution to link fix directory for rocoto in AQM.v7
-    #homeaqm = expt_config.get("user", {}).get("HOMEaqm")
-    #homeaqm_fix = os.path.join(homeaqm,"fix")
-    #if os.path.islink(homeaqm_fix) or os.path.exists(homeaqm_fix):
-    #    rm_vrfy("-rf", homeaqm_fix)
-    #fixlam = workflow_config["FIXlam"]
-    #mkdir_vrfy(f' -p "{fixlam}"')
+    homeaqm = expt_config.get("user", {}).get("HOMEaqm")
+    homeaqm_fix = os.path.join(homeaqm,"fix")
+    if os.path.islink(homeaqm_fix) or os.path.exists(homeaqm_fix):
+        rm_vrfy("-rf", homeaqm_fix)
+    fixlam = workflow_config["FIXlam"]
+    mkdir_vrfy(f' -p "{fixlam}"')
 
     #
     # -----------------------------------------------------------------------
@@ -1157,6 +1118,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
                    (run_task_make_ics or run_task_make_lbcs),
     }
 
+    fixed_files = expt_config["fixed_files"]
     prep_tasks = ["GRID", "OROG", "SFC_CLIMO"]
     res_in_fixlam_filenames = None
     for prep_task in prep_tasks:
@@ -1230,12 +1192,12 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     workflow_config["CRES"] = f"C{res_in_fixlam_filenames}"
 
     # Temporary solution to link fix directory for rocoto in AQM.v7
-    #homeaqm = expt_config.get("user", {}).get("HOMEaqm")
-    #homeaqm_fix = os.path.join(homeaqm,"fix")
-    #if os.path.exists(homeaqm_fix):
-    #    rm_vrfy("-rf", homeaqm_fix)
-    #fixaqm_sav = expt_config["platform"].get("FIXaqm_sav")
-    #ln_vrfy(f"""-fsn {fixaqm_sav} {homeaqm_fix}""")
+    homeaqm = expt_config.get("user", {}).get("HOMEaqm")
+    homeaqm_fix = os.path.join(homeaqm,"fix")
+    if os.path.exists(homeaqm_fix):
+        rm_vrfy("-rf", homeaqm_fix)
+    fixaqm_sav = expt_config["platform"].get("FIXaqm_sav")
+    ln_vrfy(f"""-fsn {fixaqm_sav} {homeaqm_fix}""")
 
     #
     # -----------------------------------------------------------------------
