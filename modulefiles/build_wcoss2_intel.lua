@@ -23,7 +23,7 @@ load(pathJoin("hdf5", os.getenv("hdf5_ver")))
 load(pathJoin("netcdf", os.getenv("netcdf_ver")))
 load(pathJoin("pio", os.getenv("pio_ver")))
 load(pathJoin("esmf", os.getenv("esmf_ver")))
-load(pathJoin("fms", os.getenv("fms_ver")))
+load(pathJoin("fms-C", os.getenv("fms_ver")))
 load(pathJoin("gftl-shared", os.getenv("gftl_shared_ver")))
 load(pathJoin("mapl", os.getenv("mapl_ver")))
 

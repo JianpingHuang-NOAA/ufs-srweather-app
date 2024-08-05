@@ -24,6 +24,7 @@
     knob_ugwp_stoch = 0,0,0,0
     knob_ugwp_version = 0
     knob_ugwp_wvspec = 1,25,25,25
+    knob_ugwp_tauamp=0.35e-3
     launch_level = 25
 /
 
@@ -95,7 +96,7 @@
     make_nh = .true.
     mountain = .false.
     n_split = 6
-    n_sponge = 24
+    n_sponge = 42
     n_zs_filter = 0
     na_init = 1
     ncep_ic = .false.
