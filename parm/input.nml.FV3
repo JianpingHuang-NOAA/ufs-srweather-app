@@ -24,7 +24,6 @@
     knob_ugwp_stoch = 0,0,0,0
     knob_ugwp_version = 0
     knob_ugwp_wvspec = 1,25,25,25
-    knob_ugwp_tauamp=0.35e-3
     launch_level = 25
 /
 
