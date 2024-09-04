@@ -46,6 +46,6 @@ cpl_aqm_parm:
   #DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2
   #DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2/rave_star/regridding
   DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2/rave_star/regridding/ 
-  COMINbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.0/bias_correction/aqmv8.0.0c
-  COMOUTbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.0/bias_correction/aqmv8.0.0c
+  COMINbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.0/bias_correction/aqmv8.0.0e
+  COMOUTbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.0/bias_correction/aqmv8.0.0e
 
