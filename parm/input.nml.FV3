@@ -77,7 +77,7 @@
     fill = .true.
     full_zs_filter = .false.
     fv_debug = .false.
-    fv_sg_adj = 300
+    fv_sg_adj = 450
     gfs_phil = .false.
     hord_dp = 6
     hord_mt = 6
@@ -94,8 +94,8 @@
     kord_wz = 9
     make_nh = .true.
     mountain = .false.
-    n_split = 5
-    n_sponge = 24
+    n_split = 6
+    n_sponge = 42
     n_zs_filter = 0
     na_init = 1
     ncep_ic = .false.
@@ -117,8 +117,8 @@
     regional_bcs_from_gsi = .false.
     res_latlon_dynamics = 'fv3_increment.nc'
     reset_eta = .false.
-    rf_cutoff = 20.e2
-    tau = 5.0
+    rf_cutoff = 100.0 
+    tau = 2.5
     use_hydro_pressure = .false.
     vtdm4 = 0.02
     warm_start = .false.
