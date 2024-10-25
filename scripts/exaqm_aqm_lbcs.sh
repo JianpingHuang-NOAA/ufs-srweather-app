@@ -184,7 +184,8 @@ if [ ${DO_AQM_GEFS_LBCS} = "TRUE" ]; then
   if [ "${DO_REAL_TIME}" = "TRUE" ]; then
     AQM_MOFILE_FP="${COMINgefs}/gefs.${yyyymmdd}/${AQM_GEFS_FILE_CYC}/chem/sfcsig/${AQM_MOFILE_FN}"
   else
-    AQM_MOFILE_FP="${COMINgefs}/${yyyymmdd}/${AQM_GEFS_FILE_CYC}/${AQM_MOFILE_FN}"
+   # AQM_MOFILE_FP="${COMINgefs}/${yyyymmdd}/${AQM_GEFS_FILE_CYC}/${AQM_MOFILE_FN}"
+   AQM_MOFILE_FP="${COMINgefs}/gfs.${yyyymmdd}/${AQM_GEFS_FILE_CYC}/${AQM_MOFILE_FN}"
   fi  
 
 check_file_with_recheck() {
@@ -281,7 +282,8 @@ Please ensure that you've built this executable."
 #
   PREP_STEP
   sync
-  eval ${RUN_CMD_AQMLBC} ${exec_fp} ${REDIRECT_OUT_ERR}
+#  eval ${RUN_CMD_AQMLBC} ${exec_fp} ${REDIRECT_OUT_ERR}
+ mpiexec -n ${NUMTS}  ${exec_fp} ${REDIRECT_OUT_ERR} >> $pgmout 2>errfile
   export err=$?
     err_chk
   POST_STEP
