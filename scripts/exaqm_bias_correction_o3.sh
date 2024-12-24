@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ax
 
 msg="JOB $job HAS BEGUN"
 postmsg "$msg"
@@ -199,7 +199,7 @@ mkdir -p ${DATA}/data/site-lists.interp
 mkdir -p ${DATA}/out/ozone/${yyyy}
 mkdir -p ${DATA}/data/bcdata.${yyyymm}/interpolated/ozone/${yyyy} 
 
-cpreq ${PARMaqm}/aqm_utils/bias_correction/sites.valid.ozone.20230331.12z.list ${DATA}/data/site-lists.interp
+cpreq ${PARMaqm}/aqm_utils/bias_correction/sites.valid.ozone.20240610.12z.list ${DATA}/data/site-lists.interp
 cpreq ${PARMaqm}/aqm_utils/bias_correction/aqm.t12z.chem_sfc.f000.nc ${DATA}/data/coords
 cpreq ${PARMaqm}/aqm_utils/bias_correction/config.interp.ozone.7-vars_${id_domain}.${cyc}z ${DATA}
 
@@ -400,8 +400,8 @@ EOF1
     if [ "$SENDDBN" = "YES" ]; then
       ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_o3_bc.227.grib2
       ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_8hr_o3_bc.227.grib2
-#      ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_o3_bc.793.grib2
-#      ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_8hr_o3_bc.793.grib2
+#      ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_o3_bc.1144.grib2
+#      ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_8hr_o3_bc.1144.grib2
     fi
    
   fi
@@ -460,8 +460,8 @@ if [ "${SENDDBN}" = "YES" ] ; then
   if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
    ${DBNROOT}/bin/dbn_alert MODEL AQM_CONC ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_o3_bc.227.grib2
    ${DBNROOT}/bin/dbn_alert MODEL AQM_CONC ${job} ${COMOUT}/${NET}.${cycle}.ave_8hr_o3_bc.227.grib2
-#   ${DBNROOT}/bin/dbn_alert MODEL AQM_CONC ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_o3_bc.793.grib2
-#   ${DBNROOT}/bin/dbn_alert MODEL AQM_CONC ${job} ${COMOUT}/${NET}.${cycle}.ave_8hr_o3_bc.793.grib2
+#   ${DBNROOT}/bin/dbn_alert MODEL AQM_CONC ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_o3_bc.1144.grib2
+#   ${DBNROOT}/bin/dbn_alert MODEL AQM_CONC ${job} ${COMOUT}/${NET}.${cycle}.ave_8hr_o3_bc.1144.grib2
   fi
 fi
 

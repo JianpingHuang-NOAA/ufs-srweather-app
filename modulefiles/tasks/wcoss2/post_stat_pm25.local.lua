@@ -10,7 +10,7 @@ prepend_path("MODULEPATH", os.getenv("modulepath_mpi"))
 
 load(pathJoin("hdf5", os.getenv("hdf5_ver")))
 load(pathJoin("netcdf", os.getenv("netcdf_ver")))
-load(pathJoin("jpeg", os.getenv("jpeg_ver")))
+load(pathJoin("libjpeg", os.getenv("libjpeg_ver")))
 load(pathJoin("g2", os.getenv("g2_ver")))
 load(pathJoin("g2tmpl", os.getenv("g2tmpl_ver")))
 load(pathJoin("w3emc", os.getenv("w3emc_ver")))

@@ -198,7 +198,7 @@ mkdir -p ${DATA}/data/site-lists.interp
 mkdir -p ${DATA}/out/pm25/${yyyy}
 mkdir -p ${DATA}/data/bcdata.${yyyymm}/interpolated/pm25/${yyyy}
 
-cpreq ${PARMaqm}/aqm_utils/bias_correction/sites.valid.pm25.20230331.12z.list ${DATA}/data/site-lists.interp
+cpreq ${PARMaqm}/aqm_utils/bias_correction/sites.valid.pm25.20240610.12z.list ${DATA}/data/site-lists.interp
 cpreq ${PARMaqm}/aqm_utils/bias_correction/aqm.t12z.chem_sfc.f000.nc ${DATA}/data/coords
 cpreq ${PARMaqm}/aqm_utils/bias_correction/config.interp.pm2.5.5-vars_${id_domain}.${cyc}z ${DATA}
 
@@ -408,8 +408,8 @@ EOF1
   if [ "${SENDDBN}" = "YES" ]; then
     ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25_bc.227.grib2
     ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25_bc.227.grib2
-#    ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25_bc.793.grib2
-#    ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25_bc.793.grib2
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_MAX ${job} ${COMOUT}/${NET}.${cycle}.max_1hr_pm25_bc.1144.grib2
+#    ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_24hr_pm25_bc.1144.grib2
   fi
 fi
 
@@ -431,7 +431,7 @@ cpreq ${NET}.${cycle}.grib2_pm25_bc.227 ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_b
 if [ "${cyc}" = "06" ] || [ "${cyc}" = "12" ]; then
  if [ "${SENDDBN}" = "YES" ]; then
   ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.227.grib2
-#  ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.793.grib2
+#  ${DBNROOT}/bin/dbn_alert MODEL AQM_PM ${job} ${COMOUT}/${NET}.${cycle}.ave_1hr_pm25_bc.1144.grib2
  fi
 fi
 

@@ -287,6 +287,7 @@ EOF1
     export FORT12="filesize"
     export FORT51=${NET}.${cycle}.max_1hr_pm25.${grid}.grib2.temp
     tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}
+    echo "hjp11: ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}"
 
     echo `ls -l  ${NET}.${cycle}.max_1hr_pm25.${grid}.grib2.temp | awk '{print $5} '` > filesize
     export XLFRTEOPTS="unit_vars=yes"
@@ -294,6 +295,7 @@ EOF1
     export FORT12="filesize"
     export FORT51=awpaqm.${cycle}.daily-1hr-pm25-max.${grid}.grib2
     tocgrib2super < ${PARMaqm}/aqm_utils/wmo/grib2_aqm_max_1hr_pm25.${cycle}.${grid}
+    echo "hjp12: ${PARMaqm}/aqm_utils/wmo/grib2_aqm_1hpm25.${cycle}.${grid}"
 
     rm -f filesize
     echo 0 > filesize

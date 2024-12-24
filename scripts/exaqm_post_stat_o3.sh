@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ax
 
 msg="JOB $job HAS BEGUN"
 postmsg "$msg"
