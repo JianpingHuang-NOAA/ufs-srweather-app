@@ -39,14 +39,15 @@ cpl_aqm_parm:
   AQM_GEFS_FILE_CYC: 00
   #DCOMINairnow: /lfs/h1/ops/prod/dcom
   DCOMINairnow: /lfs/h2/emc/physics/noscrub/jianping.huang/dcom 
-  COMINemis: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/fix/emission
-  COMINemispt: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/fix/emission/nei2016v1-pt
+  COMINemis: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.1/fix/emission
+  #COMINemispt: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v7/fix/emission/nei2016v1-pt
+  COMINemispt: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.1/fix/emission/PT-NEI2019-HIAK2016 
   #DCOMINfire: /lfs/h1/ops/prod/dcom 
   #DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2/rave_star 
   DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_NA_NRT/RAVE_raw_dcom
   #DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2
   #DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2/rave_star/regridding
   #DCOMINfire: /lfs/h2/emc/physics/noscrub/kai.wang/RAVE_fire/RAVE_v2/rave_star/regridding/ 
-  COMINbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.0/bias_correction/aqmv8.0.0l
-  COMOUTbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.0/bias_correction/aqmv8.0.0l
+  COMINbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.1/bias_correction/aqmv8.0.0h
+  COMOUTbicor: /lfs/h2/emc/physics/noscrub/UFS_SRW_App/aqm.v8.1/bias_correction/aqmv8.0.0h
 

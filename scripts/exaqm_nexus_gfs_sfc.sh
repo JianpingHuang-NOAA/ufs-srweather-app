@@ -7,7 +7,7 @@
 #
 #-----------------------------------------------------------------------
 #
-. $USHaqm/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 source_config_for_task "cpl_aqm_parm|task_nexus_gfs_sfc" ${GLOBAL_VAR_DEFNS_FP}
 #
 #-----------------------------------------------------------------------
@@ -17,7 +17,7 @@ source_config_for_task "cpl_aqm_parm|task_nexus_gfs_sfc" ${GLOBAL_VAR_DEFNS_FP}
 #
 #-----------------------------------------------------------------------
 #
-{ save_shell_opts; . $USHaqm/preamble.sh; } > /dev/null 2>&1
+{ save_shell_opts; . $USHdir/preamble.sh; } > /dev/null 2>&1
 #
 #-----------------------------------------------------------------------
 #
@@ -135,14 +135,14 @@ else
 
   # Retrieve data from A file up to fcst_len_hrs_offset=39
   htar -tvf ${gfs_sfc_tar_fp}
-  
+  PREP_STEP
   htar -xvf ${gfs_sfc_tar_fp} ${gfs_sfc_fps} ${REDIRECT_OUT_ERR}
   export err=$?
   if [ $err -ne 0 ]; then
     message_txt="htar file reading operation (\"htar -xvf ...\") failed."
     err_exit "${message_txt}"
   fi
- 
+  POST_STEP
 
   # Retireve data from B file when fcst_len_hrs_offset>=40
   if [ "${fcst_len_hrs_offset}" -ge "40" ]; then
@@ -155,14 +155,14 @@ else
       gfs_sfc_fps+=" ./${GFS_SFC_TAR_SUB_DIR}/gfs.t${hh}z.sfcf${fhr}.nc"  
     done
     htar -tvf ${gfs_sfc_tar_fp}
-    
+    PREP_STEP
     htar -xvf ${gfs_sfc_tar_fp} ${gfs_sfc_fps} ${REDIRECT_OUT_ERR}
     export err=$?
     if [ $err -ne 0 ]; then
       message_txt="htar file reading operation (\"htar -xvf ...\") failed."
       err_exit "${message_txt}"
     fi
-   
+    POST_STEP
   fi
   # Link retrieved files to staging directory
   ln -sf ${GFS_SFC_TAR_SUB_DIR}/gfs.*.nc .

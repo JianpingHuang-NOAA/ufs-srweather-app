@@ -33,7 +33,6 @@ dy_tracer_map_start: 11
 {%- endif %}
 
 ctm_aod: true
-ctm_wb_dust: false 
 ctm_pmdiag: true
 ctm_stdout: maintask
 
@@ -92,14 +91,11 @@ anthro_species::
     ALD2          1.00000  ALD2          KG/M2/S
     ALD2_PRIMARY  1.00000  ALD2_PRIMARY  KG/M2/S
     ALDX          1.00000  ALDX          KG/M2/S
-    APIN          1.00000  APIN          KG/M2/S
     BENZ          1.00000  BENZ          KG/M2/S
     BUTADIENE13   1.00000  BUTADIENE13   KG/M2/S
     CH4           1.00000  CH4           KG/M2/S
-    CH4_INV       1.00000  CH4_INV       KG/M2/S
     CL2           1.00000  CL2           KG/M2/S
     CO            1.00000  CO            KG/M2/S
-    CO2_INV       1.00000  CO2_INV       KG/M2/S
     ETH           1.00000  ETH           KG/M2/S
     ETHA          1.00000  ETHA          KG/M2/S
     ETHY          1.00000  ETHY          KG/M2/S
@@ -158,7 +154,7 @@ anthro_species::
 #
 # dust
 #
-#dust_type: fengsha
+dust_type: fengsha
 dust_format: netcdf
 dust_file: {{ aqm_rc_dust_file_fp }}
 dust_frequency: monthly
@@ -167,7 +163,7 @@ dust_species::
     CLAYF       1.00000   clayfrac     1
     SANDF       1.00000   sandfrac     1
     DRAG        1.00000   albedo_drag  1
-    UTHR        1.00000   uthres_bnu   1
+    UTHR        1.00000   uthres       1
 ::
 
 #
@@ -287,7 +283,6 @@ fire_type: gbbepx
 fire_file: {{ aqm_rc_fire_file_fp }}
 fire_frequency: {{ aqm_rc_fire_frequency }}
 fire_plume_rise: sofiev
-fire_plume_top_fraction: 0.85
 fire_species::
     PAL     0.0006     PM2.5       KG/M2/S
     PCA     0.0039     PM2.5       KG/M2/S
@@ -311,27 +306,27 @@ fire_species::
     SO2     0.0080     CO          KG/M2/S
     NH3     0.0150     CO          KG/M2/S
     CO      1.0000     CO          KG/M2/S
-    ACET    0.0011     CO          KG/M2/S
-    ALD2    0.0010     CO          KG/M2/S
-    ALDX    0.0030     CO          KG/M2/S
-    BENZ    0.0010     CO          KG/M2/S
-    CH4     0.0092     CO          KG/M2/S
-    ETH     0.0022     CO          KG/M2/S
-    ETHA    0.0011     CO          KG/M2/S
-    ETHY    0.0005     CO          KG/M2/S
+    ACET    0.0000     CO          KG/M2/S
+    ALD2    0.0000     CO          KG/M2/S
+    ALDX    0.0000     CO          KG/M2/S
+    BENZ    0.0000     CO          KG/M2/S
+    CH4     0.0000     CO          KG/M2/S
+    ETH     0.0000     CO          KG/M2/S
+    ETHA    0.0000     CO          KG/M2/S
+    ETHY    0.0000     CO          KG/M2/S
     ETOH    0.0000     CO          KG/M2/S
-    FORM    0.0043     CO          KG/M2/S
-    IOLE    0.0005     CO          KG/M2/S
-    ISOP    0.0002     CO          KG/M2/S
-    KET     0.0003     CO          KG/M2/S
-    MEOH    0.0039     CO          KG/M2/S
-    OLE     0.0034     CO          KG/M2/S
-    PAR     0.0075     CO          KG/M2/S
-    PRPA    0.0005     CO          KG/M2/S
-    TERP    0.0004     CO          KG/M2/S
-    TOL     0.0013     CO          KG/M2/S
-    UNR     0.0100     CO          KG/M2/S
-    XYL     0.0003     CO          KG/M2/S
+    FORM    0.0000     CO          KG/M2/S
+    IOLE    0.0000     CO          KG/M2/S
+    ISOP    0.0000     CO          KG/M2/S
+    KET     0.0000     CO          KG/M2/S
+    MEOH    0.0000     CO          KG/M2/S
+    OLE     0.0000     CO          KG/M2/S
+    PAR     0.0000     CO          KG/M2/S
+    PRPA    0.0000     CO          KG/M2/S
+    TERP    0.0000     CO          KG/M2/S
+    TOL     0.0000     CO          KG/M2/S
+    UNR     0.0000     CO          KG/M2/S
+    XYL     0.0000     CO          KG/M2/S
     FRP     1000000    MeanFRP     1
 ::
 
@@ -350,14 +345,11 @@ pt_stack_temperature: STKTK
 pt_stack_velocity:    STKVE
 pt_species::
     ACET          1.0000  ACET          MOL/S
-    ACROLEIN      1.0000  ACROLEIN      MOL/S
     ALD2          1.0000  ALD2          MOL/S
     ALD2_PRIMARY  1.0000  ALD2_PRIMARY  MOL/S
     ALDX          1.0000  ALDX          MOL/S
     BENZ          1.0000  BENZ          MOL/S
-    BUTADIENE13   1.0000  BUTADIENE13   MOL/S
     CH4           1.0000  CH4           MOL/S
-    CL2           1.0000  CL2           MOL/S
     CO            1.0000  CO            MOL/S
     ETH           1.0000  ETH           MOL/S
     ETHA          1.0000  ETHA          MOL/S
@@ -365,7 +357,6 @@ pt_species::
     ETOH          1.0000  ETOH          MOL/S
     FORM          1.0000  FORM          MOL/S
     FORM_PRIMARY  1.0000  FORM_PRIMARY  MOL/S
-    HCL           1.0000  HCL           MOL/S
     HONO          1.0000  HONO          MOL/S
     IOLE          1.0000  IOLE          MOL/S
     ISOP          1.0000  ISOP          MOL/S
